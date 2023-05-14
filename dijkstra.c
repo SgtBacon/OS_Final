@@ -4,22 +4,26 @@
 #include <stdlib.h>
 
 /////////////////////////
-// Name: Michael Laramie
-// Date: 3/16/23
+// Name: Michael Laramie, Jay Helm, Jonathan Hamstra
+// Date: 5/14/23
 // Class: Operating Systems
-// Project: Lab 5
-/////////////////////////
-// Sources:
-// 1. https://www.ibm.com/docs/en/i/7.3?topic=ssw_ibm_i_73/apis/users_61.html
-//     I referenced IBM when making the mutex array stix[] and when destroying them.
+// Project: Final Project
+// Dining Philosophers Algorithm #1
+// Dijkstras Method (Limiting # of eaters) 
 /////////////////////////
 
 // Number of philosophers, also serves as the number of chopsticks.
 #define PNUM 5
+#define HUNGER_MAX PNUM-1
+
+int hungryAmount = 0;
+
 
 pthread_t philosopher[PNUM];
 // Mutex array (1)
 pthread_mutex_t stix[PNUM]; 
+
+pthread_mutex_t hungryMutex;
 
 // Returns a random int from 1-3
 int myRand()
@@ -28,22 +32,29 @@ int myRand()
     return x;
 }
 
-// Brings me back to Distributed days
+// Brings me back to Distributed days   
 void diningPhilosophers(int thid)
 {
     // uncomment while loop to make it infinite.
-    while(1) {
+    //while(1) {
         int randTime = myRand();
         printf("\nHuman Thinker #%d is Thinking for %d seconds", thid, randTime);
         sleep(randTime);
 
-        //// Wait ////
+        while(hungryAmount >= HUNGER_MAX) {
+            sleep(1);
+        }
+        
+        pthread_mutex_lock(&hungryMutex);
+        hungryAmount++;
+        pthread_mutex_unlock(&hungryMutex);
+
         // Pick up left stick
-        pthread_mutex_lock(&stix[thid]);
+        pthread_mutex_lock(&stix[thid - 1]);
         printf("\nHuman Thinker #%d has picked up the left chopstick", thid);
 
         // Pick up right stick
-        pthread_mutex_lock(&stix[(thid + 1) % PNUM]);
+        pthread_mutex_lock(&stix[(thid) % PNUM]);
         printf("\nHuman Thinker #%d has picked up the right chopstick", thid);
 
         // Start eating for a rand amount of time 
@@ -53,16 +64,20 @@ void diningPhilosophers(int thid)
 
         //// Signal ////
         // Put left stick down
-        pthread_mutex_unlock(&stix[thid]);
+        pthread_mutex_unlock(&stix[thid - 1]);
         printf("\nHuman Thinker #%d has put down the left chopstick", thid);
 
         // Put right stick down
-        pthread_mutex_unlock(&stix[(thid + 1) % PNUM]);
+        pthread_mutex_unlock(&stix[(thid) % PNUM]);
         printf("\nHuman Thinker #%d has put down the right chopstick", thid);
 
+        pthread_mutex_lock(&hungryMutex);
+        hungryAmount--;
+        pthread_mutex_unlock(&hungryMutex);
+ 
         // All done.
         printf("\nHuman Thinker #%d has Consumed Enough\n", thid);
-    }
+    //}
 }
 
 int main()

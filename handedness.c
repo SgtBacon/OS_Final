@@ -4,14 +4,12 @@
 #include <stdlib.h>
 
 /////////////////////////
-// Name: Michael Laramie
-// Date: 3/16/23
+// Name: Michael Laramie, Jay Helm, Jonathan Hamstra
+// Date: 5/14/23
 // Class: Operating Systems
-// Project: Lab 5
-/////////////////////////
-// Sources:
-// 1. https://www.ibm.com/docs/en/i/7.3?topic=ssw_ibm_i_73/apis/users_61.html
-//     I referenced IBM when making the mutex array stix[] and when destroying them.
+// Project: Final Project
+// Dining Philosophers Algorithm #2
+// Handedness Deadlock Prevention
 /////////////////////////
 
 // Number of philosophers, also serves as the number of chopsticks.
@@ -35,11 +33,11 @@ void diningPhilosophersRight(int thid) {
     sleep(randTime);
 
     // Pick up right stick
-    pthread_mutex_lock(&stix[(thid + 1) % PNUM]);
+    pthread_mutex_lock(&stix[(thid) % PNUM]);
     printf("\nRighty #%d has picked up the right chopstick", thid);
 
     // Pick up left stick
-    pthread_mutex_lock(&stix[thid]);
+    pthread_mutex_lock(&stix[thid - 1]);
     printf("\nRighty #%d has picked up the left chopstick", thid);
 
     // Start eating for a rand amount of time 
@@ -48,11 +46,11 @@ void diningPhilosophersRight(int thid) {
     sleep(randTime);
 
     // Put right stick down
-    pthread_mutex_unlock(&stix[(thid + 1) % PNUM]);
+    pthread_mutex_unlock(&stix[(thid) % PNUM]);
     printf("\nRighty #%d has put down the right chopstick", thid);
 
     // Put left stick down
-    pthread_mutex_unlock(&stix[thid]);
+    pthread_mutex_unlock(&stix[thid - 1]);
     printf("\nRighty #%d has put down the left chopstick", thid);
 
     // All done.
@@ -70,11 +68,11 @@ void diningPhilosophersLeft(int thid) {
 
         //// Wait ////
         // Pick up left stick
-        pthread_mutex_lock(&stix[thid]);
+        pthread_mutex_lock(&stix[thid - 1]);
         printf("\nLefty #%d has picked up the left chopstick", thid);
 
         // Pick up right stick
-        pthread_mutex_lock(&stix[(thid + 1) % PNUM]);
+        pthread_mutex_lock(&stix[(thid) % PNUM]);
         printf("\nLefty #%d has picked up the right chopstick", thid);
 
         // Start eating for a rand amount of time 
@@ -84,11 +82,11 @@ void diningPhilosophersLeft(int thid) {
 
         //// Signal ////
         // Put left stick down
-        pthread_mutex_unlock(&stix[thid]);
+        pthread_mutex_unlock(&stix[thid - 1]);
         printf("\nLefty #%d has put down the left chopstick", thid);
 
         // Put right stick down
-        pthread_mutex_unlock(&stix[(thid + 1) % PNUM]);
+        pthread_mutex_unlock(&stix[(thid) % PNUM]);
         printf("\nLefty #%d has put down the right chopstick", thid);
 
         // All done.
