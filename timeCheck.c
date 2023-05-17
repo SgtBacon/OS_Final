@@ -90,11 +90,23 @@ void diningPhilosophers(int thid)
 
         // All done.
         printf("\nT%d has FINISHED EATING\n", thid);
+
+        //Write data
+        FILE *file;
+        file = fopen("timeCheck.csv", "w+");
+        fprintf(file, randTime, randtime, thid, hungryAmount);
+        fclose(file);
+
     }
 }
 
 int main()
 {
+    //write headers
+    FILE *file;
+    file = fopen("timeCheck.csv", "w+");
+    fprintf(file,"Time to Eat, Time Satisfied, Philospher, Meals Eaten\n");
+    fclose(file);
     // seed rand number
     srand(time(NULL));
     int i;

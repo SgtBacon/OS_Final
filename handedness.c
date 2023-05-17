@@ -56,7 +56,11 @@ void diningPhilosophersRight(int thid) {
     // All done.
     printf("\nRighty #%d has Consumed Enough\n", thid);
 
-
+    //Write data
+    FILE *file;
+    file = fopen("handedness.csv", "w+");
+    fprintf(file, randTime, randtime, thid, hungryAmount);
+    fclose(file);
 }
 void diningPhilosophersLeft(int thid) {
 
@@ -91,11 +95,22 @@ void diningPhilosophersLeft(int thid) {
 
         // All done.
         printf("\nlefty #%d has Consumed Enough\n", thid);
+
+        //write data
+        FILE *file;
+        file = fopen("handedness.csv", "w+");
+        fprintf(file, randTime, randtime, thid, hungryAmount);
+        fclose(file);
     //}
 }
 
 int main()
 {
+    //write headers
+    FILE *file;
+    file = fopen("handedness.csv", "w+");
+    fprintf(file,"Time to Eat, Time Satisfied, Philospher, Meals Eaten\n");
+    fclose(file);
     // seed rand number
     srand(time(NULL));
     int i;

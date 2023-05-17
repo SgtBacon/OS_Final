@@ -1,0 +1,4 @@
+ Time to eat, time satisfied, P1, P2, P3, P(n), meals eaten Per P, avg eat time Per P, avg eat time total, total eat time, avg wait time per P, avg wait time total
+
+
+Time to eat, time satisfied, P1 ... P(n), meals eaten, {calculate rest}
