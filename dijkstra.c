@@ -9,21 +9,22 @@
 // Class: Operating Systems
 // Project: Final Project
 // Dining Philosophers Algorithm #1
-// Dijkstras Method (Limiting # of eaters) 
+// Dijkstras Method (Limiting # of eaters)
 /////////////////////////
 
 // Number of philosophers, also serves as the number of chopsticks.
-#define PNUM 5
-#define HUNGER_MAX PNUM-1
+#define PNUM 10
+#define HUNGER_MAX PNUM - 1
+#define RUNS 3
 
 int hungryAmount = 0;
 
-
 pthread_t philosopher[PNUM];
 // Mutex array (1)
-pthread_mutex_t stix[PNUM]; 
+pthread_mutex_t stix[PNUM];
 
 pthread_mutex_t hungryMutex;
+pthread_mutex_t fileOutput;
 
 // Returns a random int from 1-3
 int myRand()
@@ -32,66 +33,69 @@ int myRand()
     return x;
 }
 
-// Brings me back to Distributed days   
+// Brings me back to Distributed days
 void diningPhilosophers(int thid)
 {
-    // uncomment while loop to make it infinite.
-    //while(1) {
+    for (int i = 0; i < RUNS; i++)
+    {
         int randTime = myRand();
-        printf("\nHuman Thinker #%d is Thinking for %d seconds", thid, randTime);
+        printf("\nPhil #%d is Thinking for %d seconds", thid, randTime);
         sleep(randTime);
 
-        while(hungryAmount >= HUNGER_MAX) {
+        while (hungryAmount >= HUNGER_MAX)
+        {
             sleep(1);
         }
-        
+
         pthread_mutex_lock(&hungryMutex);
         hungryAmount++;
         pthread_mutex_unlock(&hungryMutex);
 
         // Pick up left stick
         pthread_mutex_lock(&stix[thid - 1]);
-        printf("\nHuman Thinker #%d has picked up the left chopstick", thid);
+        printf("\nPhil #%d has picked up the left chopstick", thid);
 
         // Pick up right stick
         pthread_mutex_lock(&stix[(thid) % PNUM]);
-        printf("\nHuman Thinker #%d has picked up the right chopstick", thid);
+        printf("\nPhil #%d has picked up the right chopstick", thid);
 
-        // Start eating for a rand amount of time 
+        // Start eating for a rand amount of time
         randTime = myRand();
-        printf("\nHuman Thinker #%d is Consuming Food for %d seconds", thid, randTime);
+        printf("\nPhil #%d is Consuming Food for %d seconds", thid, randTime);
         sleep(randTime);
 
         //// Signal ////
         // Put left stick down
         pthread_mutex_unlock(&stix[thid - 1]);
-        printf("\nHuman Thinker #%d has put down the left chopstick", thid);
+        printf("\nPhil #%d has put down the left chopstick", thid);
 
         // Put right stick down
         pthread_mutex_unlock(&stix[(thid) % PNUM]);
-        printf("\nHuman Thinker #%d has put down the right chopstick", thid);
+        printf("\nPhil #%d has put down the right chopstick", thid);
 
         pthread_mutex_lock(&hungryMutex);
         hungryAmount--;
         pthread_mutex_unlock(&hungryMutex);
- 
-        // All done.
-        printf("\nHuman Thinker #%d has Consumed Enough\n", thid);
 
-        //write data
+        // All done.
+        printf("\nPhil #%d has Consumed Enough\n", thid);
+
+        // write data
+        pthread_mutex_lock(&fileOutput);
         FILE *file;
-        file = fopen("dijksta.csv", "w+");
-        fprintf(file, randTime, randtime, thid, hungryAmount);
+        file = fopen("dijkstra3.csv", "a");
+        fprintf(file, "%d, %d, %d, %d, %c", randTime, randTime, thid, (i+1), '\n');
         fclose(file);
-    //}
+        pthread_mutex_unlock(&fileOutput);
+    }
 }
 
 int main()
 {
-    //write headers
+    // write headers
     FILE *file;
-    file = fopen("dijksta.csv", "w+");
-    fprintf(file,"Time to Eat, Time Satisfied, Philospher, Meals Eaten\n");
+    file = fopen("dijkstra3.csv", "w+");
+    fprintf(file, "Time to Eat, Time Satisfied, Philospher, Meals Eaten\n");
     fclose(file);
     // seed rand number
     srand(time(NULL));
@@ -117,7 +121,8 @@ int main()
     }
 
     // Destroy the mutexes (1)
-    for(i = 0; i < PNUM; i++) {
+    for (i = 0; i < PNUM; i++)
+    {
         pthread_mutex_destroy(&stix[i]);
     }
 }

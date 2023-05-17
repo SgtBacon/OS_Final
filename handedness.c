@@ -13,11 +13,13 @@
 /////////////////////////
 
 // Number of philosophers, also serves as the number of chopsticks.
-#define PNUM 5
+#define PNUM 10
+#define RUNS 3
 
 pthread_t philosopher[PNUM];
 // Mutex array (1)
 pthread_mutex_t stix[PNUM]; 
+pthread_mutex_t fileOutput;
 
 // Returns a random int from 1-3
 int myRand()
@@ -28,44 +30,48 @@ int myRand()
 
 // Brings me back to Distributed days
 void diningPhilosophersRight(int thid) {
-    int randTime = myRand();
-    printf("\nRighty #%d is Thinking for %d seconds", thid, randTime);
-    sleep(randTime);
+    for(int i = 0; i < RUNS; i++) {
+        int randTime = myRand();
+        printf("\nRighty #%d is Thinking for %d seconds", thid, randTime);
+        sleep(randTime);
 
-    // Pick up right stick
-    pthread_mutex_lock(&stix[(thid) % PNUM]);
-    printf("\nRighty #%d has picked up the right chopstick", thid);
+        // Pick up right stick
+        pthread_mutex_lock(&stix[(thid) % PNUM]);
+        printf("\nRighty #%d has picked up the right chopstick", thid);
 
-    // Pick up left stick
-    pthread_mutex_lock(&stix[thid - 1]);
-    printf("\nRighty #%d has picked up the left chopstick", thid);
+        // Pick up left stick
+        pthread_mutex_lock(&stix[thid - 1]);
+        printf("\nRighty #%d has picked up the left chopstick", thid);
 
-    // Start eating for a rand amount of time 
-    randTime = myRand();
-    printf("\nRighty #%d is Consuming Food for %d seconds", thid, randTime);
-    sleep(randTime);
+        // Start eating for a rand amount of time 
+        randTime = myRand();
+        printf("\nRighty #%d is Consuming Food for %d seconds", thid, randTime);
+        sleep(randTime);
 
-    // Put right stick down
-    pthread_mutex_unlock(&stix[(thid) % PNUM]);
-    printf("\nRighty #%d has put down the right chopstick", thid);
+        // Put right stick down
+        pthread_mutex_unlock(&stix[(thid) % PNUM]);
+        printf("\nRighty #%d has put down the right chopstick", thid);
 
-    // Put left stick down
-    pthread_mutex_unlock(&stix[thid - 1]);
-    printf("\nRighty #%d has put down the left chopstick", thid);
+        // Put left stick down
+        pthread_mutex_unlock(&stix[thid - 1]);
+        printf("\nRighty #%d has put down the left chopstick", thid);
 
-    // All done.
-    printf("\nRighty #%d has Consumed Enough\n", thid);
+        // All done.
+        printf("\nRighty #%d has Consumed Enough\n", thid);
 
-    //Write data
-    FILE *file;
-    file = fopen("handedness.csv", "w+");
-    fprintf(file, randTime, randtime, thid, hungryAmount);
-    fclose(file);
+        //Write data
+        pthread_mutex_lock(&fileOutput);
+        FILE *file;
+        file = fopen("handedness3.csv", "a");
+        fprintf(file,"%d, %d, %d, %d, %c", randTime, randTime, thid, (i + 1), '\n');
+        fclose(file);
+        pthread_mutex_unlock(&fileOutput);
+    }
 }
 void diningPhilosophersLeft(int thid) {
 
     // uncomment while loop to make it infinite.
-    //while(1) {
+    for(int i = 0; i < RUNS; i++) {
         int randTime = myRand();
         printf("\nLefty #%d is Thinking for %d seconds", thid, randTime);
         sleep(randTime);
@@ -97,18 +103,21 @@ void diningPhilosophersLeft(int thid) {
         printf("\nlefty #%d has Consumed Enough\n", thid);
 
         //write data
+        pthread_mutex_lock(&fileOutput);
         FILE *file;
-        file = fopen("handedness.csv", "w+");
-        fprintf(file, randTime, randtime, thid, hungryAmount);
+        file = fopen("handedness3.csv", "a");
+        fprintf(file,"%d, %d, %d, %d, %c", randTime, randTime, thid, (i + 1), '\n');
         fclose(file);
-    //}
+        pthread_mutex_unlock(&fileOutput);
+    }
+
 }
 
 int main()
 {
     //write headers
     FILE *file;
-    file = fopen("handedness.csv", "w+");
+    file = fopen("handedness3.csv", "w+");
     fprintf(file,"Time to Eat, Time Satisfied, Philospher, Meals Eaten\n");
     fclose(file);
     // seed rand number
